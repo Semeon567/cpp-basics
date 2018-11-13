@@ -1,128 +1,98 @@
 #include <iostream>
 #include <iomanip>
-#include <string>
 #include <fstream>
-#include <cstring>
-
-#define N  8
+#include <string>
 
 using namespace std;
 
-void PrintArray(int a[N][N]) {
-	cout << "Array: " << endl;
-	cout << string(5 * N, '-') << endl;
-	for (int i = 0; i < N; i++) {
+int ReadFile(int** matrix, int size, string file_name);
+void PrintMatrix(int** matrix, int size);
+void FindK(int** matrix, int size, bool* k);
+void SumRowsWithNegatives(int** matrix, int size);
+
+int main()
+{
+	int size = 8;
+	int** matrix = new int*[size];
+	for (int i = 0; i < size; i++)
+		matrix[i] = new int[size];
+
+	if (ReadFile(matrix, size, "file.txt"))
+		return 1;
+
+	cout << "Matrix:\n";
+	PrintMatrix(matrix, size);
+	cout << endl;
+
+	bool* k = new bool[size];
+	for (int i = 0; i < size; i++)
+		k[i] = true;
+
+	FindK(matrix, size, k);
+	for (int i = 0; i < size; i++)
+		if (k[i])
+			cout << "\nk = " << i + 1;
+	cout << endl;
+
+	cout << endl;
+	SumRowsWithNegatives(matrix, size);
+
+	for (int i = 0; i < size; i++) delete[] matrix[i];
+	delete[] matrix;
+
+	return 0;
+}
+
+int ReadFile(int** matrix, int size, string file_name)
+{
+	ifstream fin(file_name);
+	if (!fin.is_open())
+	{
+		cout << "can't open file: " << file_name << endl;
+		return 1;
+	}
+
+	for (int i = 0; i < size; i++)
+		for (int j = 0; j < size; j++)
+			fin >> matrix[i][j];
+
+	fin.close();
+	return 0;
+}
+
+void PrintMatrix(int** matrix, int size)
+{
+	cout << string(5 * size + 1, '-') << endl;
+	for (int i = 0; i < size; i++) {
 		cout << "|";
-		for (int j = 0; j < N; j++) {
-			cout << setw(3) << a[i][j] << setw(2) << "|";
-		}
+		for (int j = 0; j < size; j++)
+			cout << setw(3) << matrix[i][j] << setw(2) << "|";
 		cout << endl;
 	}
-	cout << string(5 * N, '-') << endl << endl;
+	cout << string(5 * size + 1, '-');
 }
 
-void FileRead(int a[N][N]) {
-	ifstream fin("file.txt");
-	if (!fin.is_open()) {
-		cout << "can't open file" << endl;
-	}
-	for (int i = 0; i < N; i++) {
-		for (int j = 0; j < N; j++) {
-			fin >> a[i][j];
-		}
-	}
-	fin.close();
-}
-
-void RandomRead(int a[N][N]) {
-	srand((unsigned)time(NULL));
-
-	for (int i = 0; i < N; i++)
-	{
-		for (int j = 0; j < N; j++)
-		{
-			a[N][N] = int(pow(-1, rand() % 2))*(rand() % 10); //[-9..9]
-		}
-	}
-}
-
-void FindSubZeroInRows(int a[N][N], bool r[]) {
-	for (int i = 0; i < N; i++)
-	{
-		for (int j = 0; j < N; j++)
-		{
-			if (a[i][j] < 0) {
-				r[i] = true;
-				break;
-			}
-		}
-	}
-}
-
-void SumRow(int a[N][N], bool r[]) {
-	bool have_result = false;
-	for (int i = 0; i < N; i++)
-	{
-		if (r[i]) {
-			have_result = true;
-			cout << "Sum in " << i << " row = ";
-			int result = 0;
-			for (int j = 0; j < N; j++)
+void FindK(int** matrix, int size, bool* k)
+{
+	for (int i = 0; i < size; i++)
+		for (int j = 0; j < size; j++)
+			if (!(matrix[i][j] == matrix[j][i]))
 			{
-				result += a[i][j];
-			}
-			cout << result;
-			cout << "\n";
-		}
-	}
-	if (!have_result)
-		cout << "Error: in array no elements sub zero :(";
-}
-
-void Findk(int a[N][N], bool k[]) {
-	bool equal;
-	for (int i = 0; i < N; i++)
-	{
-		equal = true;
-		for (int j = 0; j < N; j++)
-		{
-			if (!(a[i][j] == a[j][i])) {
-				equal = false;
+				k[i] = false;
 				break;
 			}
-		}
-		if (equal)
-			k[i] = true;
-	}
 }
 
-void Printk(bool k[]) {
-	bool have_result = false;
-	cout << "k = ";
-	for (int i = 0; i < N; i++)
-	{
-		if (k[i])
-			cout << i << ", ";
-	}
-	cout << "\n\n";
-}
-
-int main() {
-	int a[N][N];
-	bool Rows[N];
-	bool k[N];
-	for (int i = 0; i < N; i++)
-	{
-		Rows[i] = false;
-		k[i] = false;
-	}
-	FileRead(a);
-	PrintArray(a);
-
-	Findk(a, k);
-	Printk(k);
-
-	FindSubZeroInRows(a, Rows);
-	SumRow(a, Rows);
-	return 0;
+void SumRowsWithNegatives(int** matrix, int size)
+{
+	for (int i = 0; i < size; i++)
+		for (int j = 0; j < size; j++)
+			if (matrix[i][j] < 0)
+			{
+				int sum = 0;
+				for (int k = 0; k < size; k++)
+					sum += matrix[i][k];
+				cout << "#" << i + 1 << " row sum: " << sum << endl;
+				break;
+			}
 }

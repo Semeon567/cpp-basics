@@ -1,112 +1,121 @@
 #include <iostream>
 #include <string>
 #include <iomanip>
-
-#define N 8 //Trains
+#include <regex>
 
 using namespace std;
 
-struct TRAIN
+struct Train
 {
 	string destination;
-	string number;
+	int number;
 	string departure_time;
 };
 
-bool isNumber(char h) {
-	if (h >= '0'&& h <= '9')
-		return true;
-	else
-		return false;
-}
+bool IsTime(string time);
+void InputTrain(Train train[], const int kNumTrains);
+void SortTrain(Train train[], const int kNumTrains);
+void PrintTrain(Train train[], const int kNumTrains);
+void PrintTimeAfter(Train train[], const int kNumTrains, string time);
 
-bool isTime(string s) {
-	for (int i = 0; i < s.length(); i++)
+int main()
+{
+	const int kNumTrains = 8;
+	Train train[kNumTrains];
+
+	InputTrain(train, kNumTrains);
+
+	SortTrain(train, kNumTrains);
+	PrintTrain(train, kNumTrains);
+
+
+	string time;
+repeat:
+	cout << "\nSelect time: ";
+	cin >> time;
+	if (!IsTime(time))
 	{
-		if (!((s[i] >= '0'&& s[i] <= '9') || (s[i] = ':')))
-			return false;
+		cout << "\nInvalid time. Use format hh:mm!";
+		goto repeat;
 	}
-	return true;
+	cout << "\nTrains starting after this time:\n";
+	PrintTimeAfter(train, kNumTrains, time);
+
+	return 0;
 }
 
-void InputTrain(TRAIN t[]) {
-	for (int i = 0; i < N; i++)
+bool IsTime(string time)
+{
+	if (regex_match(time, regex("([0-1][0-9]|2[0-3]):[0-5][0-9]")))
+		return 1;
+	else
+		return 0;
+}
+
+void InputTrain(Train train[], const int kNumTrains)
+{
+	for (int i = 0; i < kNumTrains; i++)
 	{
 		cout << i + 1 << ". Train \n";
-		cout << "Enter Train destination(e.g. NewYork): ";
-		cin >> t[i].destination;
-		cout << "Enter number of the train(e.g. 28): ";
-		cin >> t[i].number;
+		cout << "Enter train destination (e.g. New York): ";
+		getline(cin, train[i].destination);
+		cout << "Enter number of the train (e.g. 28): ";
+		cin >> train[i].number;
 	repeat:
-		cout << "Enter departure time(e.g. 12:15 ): ";
-		cin >> t[i].departure_time;
-		if (!isTime(t[i].departure_time))
+		cout << "Enter departure time (e.g. 12:15): ";
+		cin >> train[i].departure_time;
+		if (!IsTime(train[i].departure_time))
 		{
-			cout << "Invalid time. Use format hh:mm !\n";
+			cout << "\nInvalid time. Use format hh:mm!\n";
 			goto repeat;
 		}
 		cout << endl;
+		cin.ignore();
 	}
 }
 
-void SortTrain(TRAIN t[]) {
-	for (int i = 0; i < N - 1; i++)
-	{
-		if (t[i].destination.compare(t[i + 1].destination) > 0) {
-			swap(t[i], t[i + 1]);
-		}
-	}
-}
-
-void PrintTrain(TRAIN t[]) {
+void PrintTrain(Train train[], const int kNumTrains)
+{
 	cout << string(41, '-') << endl;
-	cout << "| Number | destination - departure time |\n";
+	cout << "| Number | Destination | Departure time |\n";
 	cout << string(41, '-') << endl;
-	for (int i = 0; i < N; i++)
+	for (int i = 0; i < kNumTrains; i++)
 	{
-		cout << "|" << setw(8) << t[i].number;
-		cout << "|" << setw(9) << t[i].destination;
-		cout << setw(6) << "-" << t[i].departure_time << setw(11) << "|\n";
+		cout << "|" << setw(8) << train[i].number;
+		cout << "|" << setw(13) << train[i].destination;
+		cout << "|" << setw(16) << train[i].departure_time << "|\n";
 		cout << string(41, '-') << endl;
 	}
 }
 
-bool isAfter(string t1, string t2) {
-	if (t1.compare(t2) > 0) {
-		return true;
-	}
-	return false;
+void SortTrain(Train train[], const int kNumTrains)
+{
+	for (int i = 0; i < kNumTrains - 1; i++)
+		for (int j = 0; j < kNumTrains - i - 1; j++)
+			if (train[j].destination.compare(train[j + 1].destination) > 0)
+				swap(train[j], train[j + 1]);
 }
 
-void PrintTimeAfter(TRAIN t[]) {
-	string select;
-	cout << "Select time: ";
-	cin >> select;
-	cout << "Trains starting after this time:\n";
-	bool result = false;
-	for (int i = 0; i < N; i++)
+void PrintTimeAfter(Train train[], const int kNumTrains, string time)
+{
+	cout << string(41, '-') << endl;
+	cout << "| Number | Destination | Departure time |\n";
+	cout << string(41, '-') << endl;
+
+	bool no_trains = true;
+	for (int i = 0; i < kNumTrains; i++)
 	{
-		if (isAfter(t[i].departure_time, select)) {
-			result = true;
-			cout << string(41, '-') << endl;
-			cout << "| Number | destination - departure time |\n";
-			cout << string(41, '-') << endl;
-			cout << "|" << setw(8) << t[i].number;
-			cout << "|" << setw(9) << t[i].destination;
-			cout << setw(6) << "-" << t[i].departure_time << setw(11) << "\n";
+		if ((train[i].departure_time).compare(time) > 0)
+		{
+			no_trains = false;			
+
+			cout << "|" << setw(8) << train[i].number;
+			cout << "|" << setw(13) << train[i].destination;
+			cout << "|" << setw(16) << train[i].departure_time << "|\n";
 			cout << string(41, '-') << endl;
 		}
 	}
-	if (!result)
-		cout << "No one train after this time!";
-}
 
-int main() {
-	TRAIN t[N];
-	InputTrain(t);
-	PrintTrain(t);
-	SortTrain(t);
-	PrintTrain(t);
-	PrintTimeAfter(t);
-	return 0;
+	if (no_trains)
+		cout << "No trains were found!\n";
 }

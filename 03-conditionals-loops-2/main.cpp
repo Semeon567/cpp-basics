@@ -1,5 +1,4 @@
 #define _USE_MATH_DEFINES
-
 #include <iostream>
 #include <cmath>
 #include <string>
@@ -9,7 +8,7 @@ using namespace std;
 
 int main()
 {
-	const int kMaxIter = 500;
+	const int kMaxIter = 1000000;
 
 	double xn, xk, dx, eps;
 	cout << "-1 <= x <= 1\n";
